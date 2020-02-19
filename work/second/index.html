@@ -21,10 +21,24 @@
     </div>
     <script src="../../common/js/jquery.js"></script>
     <script>
+      $(function() {
+      // htmlの読み込みが終わったら処理が始まる。
       // 今回やるのはモーダルです。
       // .modal-show をクリックすることで .modal をfadeInさせる。
-      // .modal-close をクリックで .modal をfadeOutさせる。
+        $('.modal-show').click(function() {
+          $('.modal').fadeIn();
+        })
+          // .modal-close をクリックで .modal をfadeOutさせる。
+        $('.modal-close').click(function() {
+          $('.modal').fadeOut();
+        })
       // .click() クリック時のイベントを登録する。
+      });
+
+      // click on 違い
+      // clickはページロード時に存在する要素にイベント付加。動的に追加された要素に対しては付加しない。
+      // onはページロード時の後、動的に追加された要素に対してもイベント付与する。　複数のイベントハンドラを追加できる。
+
       // .fadeIn() 一定時間かけてフェードインする。
       // .fadeOut() 一定時間かけてフェードアウトする。
     </script>

@@ -68,6 +68,45 @@
       //
       //
       //
+      $(function() {
+        var pageNum = 0;
+        $('#js-search-button').on('click', function() {
+          var searchword = $('#js-search-word').val();
+          pageNum += 1;
+          $.ajax({
+            url: 'https://app.rakuten.co.jp/services/api/BooksTotal/Search/20130522',
+            type: 'GET',
+            datatype: 'json',
+            data: {
+              applicationId: '1019399324990976605',
+              booksGenreId: '001',
+              keyword: searchword,
+              hits: 20,
+              page: pageNum,
+          },
+          }).done(function(data) {
+            // この中にデータ取得後の動きを記述していきます。
+            console.log(data);
+            if (data.hits === 0) {
+              $('.lists').before('<p class="message">検索結果が見つかりませんでした。<br>別のキーワードで検索してください。</p>');
+            } else {
+              $.each(data.Items, function(i, value) {
+                $('.lists').prepend(
+                  '<li class="lists__item">' +
+                    '<div class="lists__item__inner">' +
+                      '<a href="' + value.Item.itemUrl + '" class="lists__item__link" target="_blank">' +
+                        '<img src="' + value.Item.largeImageUrl + '" class="lists__item__img" alt="">' +
+                        '<p class="lists__item__detail">作品名：' + value.Item.title + '</p>' +
+                        '<p class="lists__item__detail">作者　：' + value.Item.author + '</p>' +
+                        '<p class="lists__item__detail">出版社：' + value.Item.publisherName + '</p>' +
+                      '</a>' +
+                    '</div>' +
+                  '</li>');
+              });
+            };
+          });
+        });
+      });
     </script>
   </body>
 </html>
