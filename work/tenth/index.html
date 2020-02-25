@@ -70,42 +70,74 @@
       //
       $(function() {
         var pageNum = 0;
+        var searchWord = '';
         $('#js-search-button').on('click', function() {
-          var searchword = $('#js-search-word').val();
-          pageNum += 1;
+          var beforeSearchWord = searchWord;
+          searchWord = $('#js-search-word').val();
+          if (searchWord === beforeSearchWord) {
+            pageNum += 1;
+          } else {
+            pageNum = 1;
+          };
           $.ajax({
             url: 'https://app.rakuten.co.jp/services/api/BooksTotal/Search/20130522',
-            type: 'GET',
+            type: 'GET',　//GET POSTの違い　APIの説明
             datatype: 'json',
             data: {
               applicationId: '1019399324990976605',
               booksGenreId: '001',
-              keyword: searchword,
+              keyword: searchWord,
               hits: 20,
               page: pageNum,
-          },
+            },
           }).done(function(data) {
-            // この中にデータ取得後の動きを記述していきます。
             console.log(data);
+            // console.log(searchWord);
+            // console.log(beforeSearchWord);
             if (data.hits === 0) {
-              $('.lists').before('<p class="message">検索結果が見つかりませんでした。<br>別のキーワードで検索してください。</p>');
+              errText("検索結果が見つかりませんでした。<br>別のキーワードで検索してください。");
             } else {
+              var list = '';
               $.each(data.Items, function(i, value) {
-                $('.lists').prepend(
-                  '<li class="lists__item">' +
-                    '<div class="lists__item__inner">' +
-                      '<a href="' + value.Item.itemUrl + '" class="lists__item__link" target="_blank">' +
-                        '<img src="' + value.Item.largeImageUrl + '" class="lists__item__img" alt="">' +
-                        '<p class="lists__item__detail">作品名：' + value.Item.title + '</p>' +
-                        '<p class="lists__item__detail">作者　：' + value.Item.author + '</p>' +
-                        '<p class="lists__item__detail">出版社：' + value.Item.publisherName + '</p>' +
-                      '</a>' +
-                    '</div>' +
-                  '</li>');
+              list += 
+                '<li class="lists__item">' +
+                  '<div class="lists__item__inner">' +
+                    '<a href="' + value.Item.itemUrl + '" class="lists__item__link" target="_blank">' +
+                      '<img src="' + value.Item.largeImageUrl + '" class="lists__item__img" alt="">' +
+                      '<p class="lists__item__detail">作品名：' + value.Item.title + '</p>' +
+                      '<p class="lists__item__detail">作者　：' + value.Item.author + '</p>' +
+                      '<p class="lists__item__detail">出版社：' + value.Item.publisherName + '</p>' +
+                    '</a>' +
+                  '</div>' +
+                '</li>';
+                if (searchWord === beforeSearchWord) {
+                  addList(list);
+                } else {
+                  $('.lists').empty();
+                  addList(list);
+                };
               });
+            };
+          }).fail(function(err) {
+            console.log(err);
+            if (err.status === 429) {
+              errText("時間をおいて再度検索して下さい。");
+            } else if (searchWord.length === 0) {
+              errText("検索ワードを入力してください。");
+            } else if (searchWord.length === 1) {
+              errText("2文字以上で検索して下さい。");
+            } else {
+              errText("正常に通信が行われませんでした。");
             };
           });
         });
+        // 関数
+        function errText(text) {
+          $('.lists').html('<p class="message">'+text+'</p>');
+        };
+        function addList(list) {
+          $('.lists').prepend(list);
+        };
       });
     </script>
   </body>
