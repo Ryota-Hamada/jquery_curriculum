@@ -110,13 +110,13 @@
                     '</a>' +
                   '</div>' +
                 '</li>';
+              });
                 if (searchWord === beforeSearchWord) {
                   addList(list);
                 } else {
                   $('.lists').empty();
                   addList(list);
                 };
-              });
             };
           }).fail(function(err) {
             console.log(err);
@@ -133,7 +133,8 @@
         });
         // 関数
         function errText(text) {
-          $('.lists').html('<p class="message">'+text+'</p>');
+          $('.message').remove();
+          $('.lists').before('<p class="message">'+text+'</p>');
         };
         function addList(list) {
           $('.lists').prepend(list);
