@@ -72,33 +72,45 @@
         var pageNum = 0;
         var searchWord = '';
         $('#js-search-button').on('click', function() {
+          search();
+          $.ajax({　//ajax中身の説明
+            url: 'https://app.rakuten.co.jp/services/api/BooksTotal/Search/20130522', // データを送る先のURL
+            type: 'GET',　// 通信に利用するHTTPメソッド GETはURLにパラメーターが載る
+            datatype: 'json',　// JavaScriptのオブジェクト表記構文
+            data: { // 送信されるデータ
+              applicationId: '1019399324990976605', // APIを使用するための固有のID？？
+              booksGenreId: '001', // ジャンルを特定するためのID
+              keyword: searchWord, // 検索キーワード
+              hits: 20,　// 1ページあたりの取得件数
+              page: pageNum, // 取得ページ
+            },
+          }).done(function(data) {
+            searchSuccess(data);
+          }).fail(function(err) {
+            searchErr(err);
+          });
+        });
+
+        // 関数
+        function　search() {
           var beforeSearchWord = searchWord;
           searchWord = $('#js-search-word').val();
           if (searchWord === beforeSearchWord) {
             pageNum += 1;
           } else {
+            $('.lists').empty();
             pageNum = 1;
           };
-          $.ajax({
-            url: 'https://app.rakuten.co.jp/services/api/BooksTotal/Search/20130522',
-            type: 'GET',　//GET POSTの違い　APIの説明
-            datatype: 'json',
-            data: {
-              applicationId: '1019399324990976605',
-              booksGenreId: '001',
-              keyword: searchWord,
-              hits: 20,
-              page: pageNum,
-            },
-          }).done(function(data) {
-            console.log(data);
-            // console.log(searchWord);
-            // console.log(beforeSearchWord);
-            if (data.hits === 0) {
-              errText("検索結果が見つかりませんでした。<br>別のキーワードで検索してください。");
-            } else {
-              var list = '';
-              $.each(data.Items, function(i, value) {
+        };
+        function searchSuccess(data) {
+          console.log(data);
+          // console.log(searchWord);
+          // console.log(beforeSearchWord);
+          if (data.hits === 0) {
+            errText("検索結果が見つかりませんでした。<br>別のキーワードで検索してください。");
+          } else {
+            var list = '';
+            $.each(data.Items, function(i, value) {
               list += 
                 '<li class="lists__item">' +
                   '<div class="lists__item__inner">' +
@@ -110,34 +122,28 @@
                     '</a>' +
                   '</div>' +
                 '</li>';
-              });
-                if (searchWord === beforeSearchWord) {
-                  addList(list);
-                } else {
-                  $('.lists').empty();
-                  addList(list);
-                };
-            };
-          }).fail(function(err) {
-            console.log(err);
-            if (err.status === 429) {
-              errText("時間をおいて再度検索して下さい。");
-            } else if (searchWord.length === 0) {
-              errText("検索ワードを入力してください。");
-            } else if (searchWord.length === 1) {
-              errText("2文字以上で検索して下さい。");
-            } else {
-              errText("正常に通信が行われませんでした。");
-            };
-          });
-        });
-        // 関数
+            });         
+              addList(list);
+          };
+        }
+        function addList(list) {
+          $('.lists').prepend(list);
+        };
+        function searchErr(err) {
+          console.log(err);
+          if (err.status === 429) {
+            errText("時間をおいて再度検索して下さい。");
+          } else if (err.responseJSON.error_description === "keyword must be set") {
+            errText("検索ワードを入力してください。");
+          } else if (err.responseJSON.error_description === "keyword length must be over 2 characters") {
+            errText("2文字以上で検索して下さい。");
+          } else {
+            errText("正常に通信が行われませんでした。");
+          };
+        };
         function errText(text) {
           $('.message').remove();
           $('.lists').before('<p class="message">'+text+'</p>');
-        };
-        function addList(list) {
-          $('.lists').prepend(list);
         };
       });
     </script>
